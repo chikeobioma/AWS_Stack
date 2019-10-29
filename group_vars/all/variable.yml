@@ -1,0 +1,14 @@
+---
+ansible_ssh_private_key_file: /Users/chiobi/sportbook_git/ansible/chiobi/devOpsRotation/private.pem
+ansible_user: centos
+ansible_become: true
+nodejs_server1_ip: "{{ hostvars[groups['tag_Group_nodejs_servers'][0]]['ansible_ec2_local_ipv4'] }}"
+nodejs_server2_ip: "{{ hostvars[groups['tag_Group_nodejs_servers'][1]]['ansible_ec2_local_ipv4'] }}"
+mysql_server_ip: "{{ hostvars[groups['tag_Group_mysql_servers'][0]]['ansible_ec2_local_ipv4'] }}"
+varnish_server_ip: "{{ hostvars[groups['tag_Group_varnish_servers'][0]]['ansible_ec2_local_ipv4'] }}"
+root_password: "{{ vault_root_password }}" 
+db_user_pw: "{{ vault_db_user_pw }}"
+db_user: chiobi
+system_db_rpm: kbd-misc
+
+...

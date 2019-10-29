@@ -1,0 +1,4 @@
+---
+# handlers file for nodejs
+- name: Start Node.js app
+  command: forever start nodejsapp.js

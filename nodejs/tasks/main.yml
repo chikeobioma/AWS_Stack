@@ -1,0 +1,34 @@
+---
+- name: Install npm and node.js
+  yum: 
+    name: ['npm', 'nodejs'] 
+    state: installed
+
+- name: Install NPM Package forever and http-server globally to run node.js apps
+  npm:  name={{ item }} global=yes state=present
+  with_items:
+    - forever
+    - http-server
+    
+- name: Install NPM Package mysql locally
+  npm:  
+    name: mysql 
+    state: present
+    path: /home/centos/
+
+- name: Copy nodejsapp.js file
+  template:
+    src: nodejsapp.js.j2
+    dest: /home/centos/nodejsapp.js
+    mode: '0755'
+
+- name: Restart Node.js app
+  command: forever stop nodejsapp.js
+  ignore_errors: yes
+  no_log: true
+
+- name: Restart Node.js app
+  command: forever start nodejsapp.js
+  ignore_errors: yes
+  no_log: true
+  

@@ -1,0 +1,19 @@
+---
+- ec2_metadata_facts:
+  
+- name: Configure a MOTD (message of the day)
+  copy:
+    content: "-------\nWelcome to Chike Obioma's {{ ansible_hostname }}\n\nThis is an AWS EC2 server\n-------\n"
+    dest: /etc/motd
+  with_items:
+    - CentOS
+  when: ansible_distribution == item 
+
+- name: Copy pem file to remote server
+  copy:
+    src: /Users/chiobi/sportbook_git/ansible/chiobi/devOpsRotation/private.pem
+    dest: /home/centos/private.pem
+    owner: centos
+    group: centos
+    mode: '0400'
+

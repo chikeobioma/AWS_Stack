@@ -1,0 +1,28 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Set the packagecloud repository name based on the version.
+  set_fact:
+    varnish_packagecloud_repo: "varnish{{ varnish_version|replace('.', '') }}"
+
+- include_tasks: varnish.yml
+
+- name: Ensure Varnish config path exists.
+  file:
+    path: "{{ varnish_config_path }}"
+    state: directory
+
+- name: Copy default.vcl.j2 to /etc/varnish/
+  template:
+    src: default.vcl.j2
+    dest: /etc/varnish/default.vcl
+  notify: restart varnish
+
+- name: Ensure Varnish services are started and enabled on startup.
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items: "{{ varnish_enabled_services | default([]) }}"
+  

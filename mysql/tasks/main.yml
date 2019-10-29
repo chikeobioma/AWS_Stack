@@ -1,0 +1,43 @@
+---
+
+- name: Install the MySQL repo.
+  yum:
+    name: https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+    state: present
+
+- name: Ensure MySQL packages are installed.
+  yum:
+    name: "{{ mysql_packages }}"
+    state: present
+  notify: start mysql
+
+- name: Install python2-PyMySQL
+  yum:
+    name: python2-PyMySQL
+    state: present
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+    
+- name: Retreive temp root password
+  shell: "grep 'A temporary password is generated for root@localhost' /var/log/mysqld.log | awk -F ' ' '{print $(NF)}'"
+  register: default_root_password
+
+- name: Change root password
+  command: mysql --user root --password={{ default_root_password.stdout }} --connect-expired-password --execute="ALTER USER root@localhost IDENTIFIED BY '{{ root_password }}';"
+  ignore_errors: yes
+  no_log: true
+
+- name: Create local user, nodejs_server[1..2] users, and grant all users privileges
+  command: "{{ item }}"
+  loop:
+    - mysql --user root --password={{ root_password }} --execute="CREATE USER IF NOT EXISTS '{{ db_user }}'@localhost IDENTIFIED BY '{{ db_user_pw }}';"
+    - mysql --user root --password={{ root_password }} --execute="GRANT ALL PRIVILEGES ON * . * TO '{{ db_user }}'@'localhost';"
+    - mysql --user {{ db_user }} --password={{ db_user_pw }} --execute="CREATE DATABASE IF NOT EXISTS testdb;"
+    - mysql --user root --password={{ root_password }} --execute="ALTER USER '{{ db_user }}'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{ db_user_pw }}';"
+    - mysql --user root --password={{ root_password }} --execute="CREATE USER IF NOT EXISTS '{{ db_user }}'@'{{ nodejs_server1_ip }}' IDENTIFIED WITH mysql_native_password BY '{{ db_user_pw }}';"
+    - mysql --user root --password={{ root_password }} --execute="GRANT ALL PRIVILEGES ON * . * TO '{{ db_user }}'@'{{ nodejs_server1_ip }}';"
+    - mysql --user root --password={{ root_password }} --execute="CREATE USER IF NOT EXISTS '{{ db_user }}'@'{{ nodejs_server2_ip }}' IDENTIFIED WITH mysql_native_password BY '{{ db_user_pw }}';"
+    - mysql --user root --password={{ root_password }} --execute="GRANT ALL PRIVILEGES ON * . * TO '{{ db_user }}'@'{{ nodejs_server2_ip }}';"
+  no_log: true
+  changed_when: true

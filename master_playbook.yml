@@ -1,0 +1,23 @@
+---
+
+- name: General server setup
+  hosts: tag_Group_*
+  roles:
+    - common
+      
+- name: Setup and Configure MySQL server
+  hosts: tag_Group_mysql_servers
+  roles:
+    - mysql
+
+- name: Setup and Configure Varnish server
+  hosts: tag_Group_varnish_servers
+  roles:
+    - varnish
+
+- name: Setup and Configure NodeJS servers
+  hosts:  tag_Group_nodejs_servers  
+  roles: 
+    - nodejs
+...
+

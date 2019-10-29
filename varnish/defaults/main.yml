@@ -1,0 +1,12 @@
+---
+varnish_package_name: "varnish"
+varnish_version: "4.1"
+
+varnish_config_path: /etc/varnish
+
+varnish_enabled_services:
+  - varnish
+
+varnish_packagecloud_repo_yum_repository_priority: "1"
+varnish_yum_repo_baseurl: https://packagecloud.io/varnishcache/{{ varnish_packagecloud_repo }}/el/{{ ansible_distribution_major_version|int }}/$basearch
+
